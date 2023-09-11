@@ -5,18 +5,18 @@ Subject: [PATCH] Player invulnerabilities
 
 
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f3ea058bb 100644
+index f9571a379214d24a24e0b6b6277636666c1661f1..ffc10f3cb841eafbf90b7f26b485991ced31d4d1 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-@@ -276,6 +276,7 @@ public class ServerPlayer extends Player {
+@@ -279,6 +279,7 @@ public class ServerPlayer extends Player {
      public PlayerNaturallySpawnCreaturesEvent playerNaturallySpawnedEvent; // Paper
      public org.bukkit.event.player.PlayerQuitEvent.QuitReason quitReason = null; // Paper - there are a lot of changes to do if we change all methods leading to the event
      public boolean purpurClient = false; // Purpur
 +    public boolean acceptingResourcePack = false; // Purpur
  
-     public ServerPlayer(MinecraftServer server, ServerLevel world, GameProfile profile) {
-         super(world, world.getSharedSpawnPos(), world.getSharedSpawnAngle(), profile);
-@@ -375,6 +376,7 @@ public class ServerPlayer extends Player {
+     private final java.util.concurrent.atomic.AtomicReference<io.papermc.paper.chunk.system.RegionizedPlayerChunkLoader.ViewDistances> viewDistances = new java.util.concurrent.atomic.AtomicReference<>(new io.papermc.paper.chunk.system.RegionizedPlayerChunkLoader.ViewDistances(-1, -1, -1));
+     public io.papermc.paper.chunk.system.RegionizedPlayerChunkLoader.PlayerChunkLoaderData chunkLoader;
+@@ -419,6 +420,7 @@ public class ServerPlayer extends Player {
          this.bukkitPickUpLoot = true;
          this.maxHealthCache = this.getMaxHealth();
          this.cachedSingleMobDistanceMap = new com.destroystokyo.paper.util.PooledHashSets.PooledObjectLinkedOpenHashSet<>(this); // Paper
@@ -24,7 +24,7 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
      }
  
      // Yes, this doesn't match Vanilla, but it's the best we can do for now.
-@@ -1056,6 +1058,12 @@ public class ServerPlayer extends Player {
+@@ -1100,6 +1102,12 @@ public class ServerPlayer extends Player {
  
      }
  
@@ -37,7 +37,7 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
      @Override
      public boolean hurt(DamageSource source, float amount) {
          if (this.isInvulnerableTo(source)) {
-@@ -1063,7 +1071,7 @@ public class ServerPlayer extends Player {
+@@ -1107,7 +1115,7 @@ public class ServerPlayer extends Player {
          } else {
              boolean flag = this.server.isDedicatedServer() && this.isPvpAllowed() && source.is(DamageTypeTags.IS_FALL);
  
@@ -46,7 +46,7 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
                  return false;
              } else {
                  Entity entity = source.getEntity();
-@@ -1243,6 +1251,7 @@ public class ServerPlayer extends Player {
+@@ -1286,6 +1294,7 @@ public class ServerPlayer extends Player {
              }
              // Paper end
  
@@ -54,7 +54,7 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
              return this;
          }
      }
-@@ -2055,6 +2064,7 @@ public class ServerPlayer extends Player {
+@@ -2108,6 +2117,7 @@ public class ServerPlayer extends Player {
      }
  
      public void sendTexturePack(String url, String hash, boolean required, @Nullable Component resourcePackPrompt) {
@@ -62,7 +62,7 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
          this.connection.send(new ClientboundResourcePackPacket(url, hash, required, resourcePackPrompt));
      }
  
-@@ -2586,9 +2596,17 @@ public class ServerPlayer extends Player {
+@@ -2695,9 +2705,17 @@ public class ServerPlayer extends Player {
  
      @Override
      public boolean isImmobile() {
@@ -82,15 +82,15 @@ index 71905201cd42094fa3f545f29ada0f7ebcd7c21d..f5c5ed6cfb963ad2b5612fd7623d5e0f
      public Scoreboard getScoreboard() {
          return this.getBukkitEntity().getScoreboard().getHandle();
 diff --git a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index febae4d31eb82945765fa7606515a570d3f111ce..e7eec6e22f8ba5a5a7042cd82ece1fe0ec58b348 100644
+index f23e8f89e09551d245fcef5507ecd061ed1b3ca9..81cbb6a55fd3e6a3b9ec96cc54b43e123c243482 100644
 --- a/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/src/main/java/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-@@ -2091,12 +2091,21 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
+@@ -2149,12 +2149,21 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
      @Override
      public void handleResourcePackResponse(ServerboundResourcePackPacket packet) {
-         PacketUtils.ensureRunningOnSameThread(packet, this, this.player.getLevel());
+         PacketUtils.ensureRunningOnSameThread(packet, this, this.player.serverLevel());
 +        // Purpur start
-+        if (player.level.purpurConfig.playerInvulnerableWhileAcceptingResourcePack && !this.player.acceptingResourcePack) {
++        if (player.level().purpurConfig.playerInvulnerableWhileAcceptingResourcePack && !this.player.acceptingResourcePack) {
 +            ServerGamePacketListenerImpl.LOGGER.info("Disconnecting {} due to resource pack packet exploitation attempt", this.player.getName());
 +            this.disconnect(Component.translatable("multiplayer.texturePrompt.failure.line1"), org.bukkit.event.player.PlayerKickEvent.Cause.RESOURCE_PACK_REJECTION); // "Server resource pack couldn't be applied"
 +            return;
@@ -102,29 +102,29 @@ index febae4d31eb82945765fa7606515a570d3f111ce..e7eec6e22f8ba5a5a7042cd82ece1fe0
          }
          // Paper start
          PlayerResourcePackStatusEvent.Status packStatus = PlayerResourcePackStatusEvent.Status.values()[packet.action.ordinal()];
-+        if (player.level.purpurConfig.playerInvulnerableWhileAcceptingResourcePack) player.setFrozen(packStatus == PlayerResourcePackStatusEvent.Status.ACCEPTED); // Purpur
++        if (player.level().purpurConfig.playerInvulnerableWhileAcceptingResourcePack) player.setFrozen(packStatus == PlayerResourcePackStatusEvent.Status.ACCEPTED); // Purpur
 +        this.player.acceptingResourcePack = packStatus == PlayerResourcePackStatusEvent.Status.ACCEPTED; // Purpur
          player.getBukkitEntity().setResourcePackStatus(packStatus);
          this.cserver.getPluginManager().callEvent(new PlayerResourcePackStatusEvent(this.getCraftPlayer(), packStatus)); // CraftBukkit
          // Paper end
 diff --git a/src/main/java/net/minecraft/server/players/PlayerList.java b/src/main/java/net/minecraft/server/players/PlayerList.java
-index cb211e2aad3cc300099b724b7fa78cc4f24aee7c..4142e454d10e6ea3996e1ae372fcb1405829e52b 100644
+index 42801a26b9d5f8af2d0ce1fef864bb031cfa8965..2cac536ebbc21a23a2219c630fe477bf9c00ce65 100644
 --- a/src/main/java/net/minecraft/server/players/PlayerList.java
 +++ b/src/main/java/net/minecraft/server/players/PlayerList.java
-@@ -967,6 +967,8 @@ public abstract class PlayerList {
+@@ -985,6 +985,8 @@ public abstract class PlayerList {
          }
          // Paper end
  
-+        entityplayer1.spawnInvulnerableTime = entityplayer1.level.purpurConfig.playerSpawnInvulnerableTicks; // Purpur
++        entityplayer1.spawnInvulnerableTime = entityplayer1.level().purpurConfig.playerSpawnInvulnerableTicks; // Purpur
 +
          // CraftBukkit end
          return entityplayer1;
      }
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index aeea585b802966cd599e33a45887899cad31872b..c7fcf3da9ebfe139dd1777c17d5c62a9b9d5e039 100644
+index d0986b7b130f790c21d2324d0014d258bc36c527..c6ede1fac5c68f2912a9c401765bd10b09afe7f9 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -3214,5 +3214,20 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
+@@ -3293,5 +3293,20 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
      public void resetIdleTimer() {
          getHandle().resetLastActionTime();
      }
@@ -146,10 +146,10 @@ index aeea585b802966cd599e33a45887899cad31872b..c7fcf3da9ebfe139dd1777c17d5c62a9
      // Purpur end
  }
 diff --git a/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java b/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
-index cbb750eabb892348b3b6632782e9eef9b125d16d..5bda6411f4c419cf6c0f8b6e498ec22f3f34da3a 100644
+index 3ed1a91c93f659306acaf8bad6820f49208554c8..f521d0e73908037c76c5669b401e422040e2a77b 100644
 --- a/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
 +++ b/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
-@@ -97,6 +97,8 @@ public class PurpurWorldConfig {
+@@ -95,6 +95,8 @@ public class PurpurWorldConfig {
      public boolean idleTimeoutCountAsSleeping = false;
      public boolean idleTimeoutUpdateTabList = false;
      public boolean idleTimeoutTargetPlayer = true;
@@ -158,7 +158,7 @@ index cbb750eabb892348b3b6632782e9eef9b125d16d..5bda6411f4c419cf6c0f8b6e498ec22f
      private void playerSettings() {
          if (PurpurConfig.version < 19) {
              boolean oldVal = getBoolean("gameplay-mechanics.player.idle-timeout.mods-target", idleTimeoutTargetPlayer);
-@@ -108,6 +110,8 @@ public class PurpurWorldConfig {
+@@ -106,6 +108,8 @@ public class PurpurWorldConfig {
          idleTimeoutCountAsSleeping = getBoolean("gameplay-mechanics.player.idle-timeout.count-as-sleeping", idleTimeoutCountAsSleeping);
          idleTimeoutUpdateTabList = getBoolean("gameplay-mechanics.player.idle-timeout.update-tab-list", idleTimeoutUpdateTabList);
          idleTimeoutTargetPlayer = getBoolean("gameplay-mechanics.player.idle-timeout.mobs-target", idleTimeoutTargetPlayer);

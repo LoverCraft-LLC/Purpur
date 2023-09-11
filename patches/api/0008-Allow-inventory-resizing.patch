@@ -5,10 +5,10 @@ Subject: [PATCH] Allow inventory resizing
 
 
 diff --git a/src/main/java/org/bukkit/event/inventory/InventoryType.java b/src/main/java/org/bukkit/event/inventory/InventoryType.java
-index a8e631315f2da68895a258cf0ba9875bc88fc48c..d5648ec745e3530aecf18c3e1f3185a5f63f3d11 100644
+index cbce826add9dc2b3187c7bea00c27b785d7517df..3a98de6407d9a6307f89c207be1f09e639385ebe 100644
 --- a/src/main/java/org/bukkit/event/inventory/InventoryType.java
 +++ b/src/main/java/org/bukkit/event/inventory/InventoryType.java
-@@ -155,7 +155,7 @@ public enum InventoryType {
+@@ -151,7 +151,7 @@ public enum InventoryType {
      SMITHING_NEW(4, "Upgrade Gear"),
      ;
  

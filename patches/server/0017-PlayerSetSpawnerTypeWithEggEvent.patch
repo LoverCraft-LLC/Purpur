@@ -5,7 +5,7 @@ Subject: [PATCH] PlayerSetSpawnerTypeWithEggEvent
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/EntityType.java b/src/main/java/net/minecraft/world/entity/EntityType.java
-index 8af0918d3a62de58a4b2af55022c812bb0e46092..944ccfacd740ea0cdd0b8ffbd75bd2e561ebad9b 100644
+index aa5cec6d56d7a8e80861aa4c9b4a74ca3e64be8c..08beb4c4dfcb0986cdebb4d0cacc25e4e9c17674 100644
 --- a/src/main/java/net/minecraft/world/entity/EntityType.java
 +++ b/src/main/java/net/minecraft/world/entity/EntityType.java
 @@ -315,6 +315,16 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
@@ -43,7 +43,7 @@ index 8af0918d3a62de58a4b2af55022c812bb0e46092..944ccfacd740ea0cdd0b8ffbd75bd2e5
          if (this.descriptionId == null) {
              this.descriptionId = Util.makeDescriptionId("entity", BuiltInRegistries.ENTITY_TYPE.getKey(this));
 diff --git a/src/main/java/net/minecraft/world/item/SpawnEggItem.java b/src/main/java/net/minecraft/world/item/SpawnEggItem.java
-index 31268e25056f980798ef7db72c4f955a074cc639..955822da142a2463af536dd1ce48037deda41402 100644
+index 741719301e6fc91a598e74342810c4185e6fde26..6fbff9c02fbabf03c9c649a9ea6128021081f9cd 100644
 --- a/src/main/java/net/minecraft/world/item/SpawnEggItem.java
 +++ b/src/main/java/net/minecraft/world/item/SpawnEggItem.java
 @@ -68,6 +68,15 @@ public class SpawnEggItem extends Item {

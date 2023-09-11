@@ -5,10 +5,10 @@ Subject: [PATCH] Lagging threshold
 
 
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 57f6de7872bfa80cf7668524975946cbd7fcda56..6cdcd4f105b15f10d60499572f6f4f830565513e 100644
+index 1265167bc9167cb586b98391ea3daaa09fa4e7fb..287f5b64622cdc98cbe8248c89af27c97fdf8347 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
-@@ -309,6 +309,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -306,6 +306,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
      // Spigot end
      public final io.papermc.paper.configuration.PaperConfigurations paperConfigurations;
      public static long currentTickLong = 0L; // Paper
@@ -16,7 +16,7 @@ index 57f6de7872bfa80cf7668524975946cbd7fcda56..6cdcd4f105b15f10d60499572f6f4f83
  
      public volatile Thread shutdownThread; // Paper
      public volatile boolean abnormalExit = false; // Paper
-@@ -1159,6 +1160,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1155,6 +1156,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
                      this.recentTps[1] = tps5.getAverage();
                      this.recentTps[2] = tps15.getAverage();
                      // Paper end
@@ -25,10 +25,10 @@ index 57f6de7872bfa80cf7668524975946cbd7fcda56..6cdcd4f105b15f10d60499572f6f4f83
                  }
                  // Spigot end
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 3c7ef6dc1306c144de74cd540d509f67716ff434..9c949e2e7d2d25f0012b3e7bc2e054cac42230a3 100644
+index 5acff437226157b851ad4231d0a6e7344da8a1ea..9048d5b642bc25d433e8a6a6a8e0287d693e1d94 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-@@ -2941,5 +2941,10 @@ public final class CraftServer implements Server {
+@@ -3171,5 +3171,10 @@ public final class CraftServer implements Server {
      public String getServerName() {
          return this.getProperties().serverName;
      }
@@ -40,10 +40,10 @@ index 3c7ef6dc1306c144de74cd540d509f67716ff434..9c949e2e7d2d25f0012b3e7bc2e054ca
      // Purpur end
  }
 diff --git a/src/main/java/org/purpurmc/purpur/PurpurConfig.java b/src/main/java/org/purpurmc/purpur/PurpurConfig.java
-index 16ed8266bbc08963aa3973f2e48a8f76b640ed18..dd3ed29fdac7ae1f35ecf520f92b9f36ca6fdb98 100644
+index bb7acf61cf2928181d014a17166d4d1414218e01..34afed28faeb56352b48faf8078a5fb07912eb5e 100644
 --- a/src/main/java/org/purpurmc/purpur/PurpurConfig.java
 +++ b/src/main/java/org/purpurmc/purpur/PurpurConfig.java
-@@ -191,6 +191,11 @@ public class PurpurConfig {
+@@ -193,6 +193,11 @@ public class PurpurConfig {
          serverModName = getString("settings.server-mod-name", serverModName);
      }
  

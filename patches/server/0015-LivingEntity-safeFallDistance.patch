@@ -5,10 +5,10 @@ Subject: [PATCH] LivingEntity safeFallDistance
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index cc2369f208546bf8c346c30d5c3ccd535e09f09f..ad1591644a429b33c042e84a0114fe36bbcc6ec4 100644
+index 67f6432160ddd85051305bc830bab4f922cdbba6..0d8c8f9529003a4a216e12e231e212058bb0fb28 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-@@ -251,6 +251,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+@@ -253,6 +253,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
      private boolean skipDropExperience;
      // CraftBukkit start
      public int expToDrop;
@@ -16,18 +16,25 @@ index cc2369f208546bf8c346c30d5c3ccd535e09f09f..ad1591644a429b33c042e84a0114fe36
      public boolean forceDrops;
      public ArrayList<org.bukkit.inventory.ItemStack> drops = new ArrayList<org.bukkit.inventory.ItemStack>();
      public final org.bukkit.craftbukkit.attribute.CraftAttributeMap craftAttributes;
-@@ -351,8 +352,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
+@@ -353,7 +354,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
              this.tryAddSoulSpeed();
          }
  
--        if (!this.level.isClientSide && this.fallDistance > 3.0F && onGround) {
--            float f = (float) Mth.ceil(this.fallDistance - 3.0F);
-+        if (!this.level.isClientSide && this.fallDistance > this.safeFallDistance && onGround) { // Purpur
-+            float f = (float) Mth.ceil(this.fallDistance - this.safeFallDistance); // Purpur
+-        if (!this.level().isClientSide && this.fallDistance > 3.0F && onGround && !state.isAir()) {
++        if (!this.level().isClientSide && this.fallDistance > this.safeFallDistance && onGround && !state.isAir()) { // Purpur
+             double d1 = this.getX();
+             double d2 = this.getY();
+             double d3 = this.getZ();
+@@ -368,7 +369,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+                 d3 = (double) landedPosition.getZ() + 0.5D + d5 / d6 * 0.5D;
+             }
  
-             if (!state.isAir()) {
-                 double d1 = Math.min((double) (0.2F + f / 15.0F), 2.5D);
-@@ -2018,7 +2019,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+-            float f = (float) Mth.ceil(this.fallDistance - 3.0F);
++            float f = (float) Mth.ceil(this.fallDistance - this.safeFallDistance); // Purpur
+             double d7 = Math.min((double) (0.2F + f / 15.0F), 2.5D);
+             int i = (int) (150.0D * d7);
+ 
+@@ -2058,7 +2059,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
              MobEffectInstance mobeffect = this.getEffect(MobEffects.JUMP);
              float f2 = mobeffect == null ? 0.0F : (float) (mobeffect.getAmplifier() + 1);
  
@@ -37,10 +44,10 @@ index cc2369f208546bf8c346c30d5c3ccd535e09f09f..ad1591644a429b33c042e84a0114fe36
      }
  
 diff --git a/src/main/java/net/minecraft/world/entity/animal/horse/AbstractHorse.java b/src/main/java/net/minecraft/world/entity/animal/horse/AbstractHorse.java
-index 28dbaeb4de0c133a68878f65da33d2939c7344b2..c044ed3a96f10584fd5aec836624bca1b414182d 100644
+index 7a7466092a2cd194abec3abdb77a7c649b4b433c..fdf41f4990923aa4309febb9c0ca8009de8e16f1 100644
 --- a/src/main/java/net/minecraft/world/entity/animal/horse/AbstractHorse.java
 +++ b/src/main/java/net/minecraft/world/entity/animal/horse/AbstractHorse.java
-@@ -385,7 +385,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
+@@ -384,7 +384,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
  
      @Override
      protected int calculateFallDamage(float fallDistance, float damageMultiplier) {
@@ -50,7 +57,7 @@ index 28dbaeb4de0c133a68878f65da33d2939c7344b2..c044ed3a96f10584fd5aec836624bca1
  
      protected int getInventorySize() {
 diff --git a/src/main/java/net/minecraft/world/entity/monster/Giant.java b/src/main/java/net/minecraft/world/entity/monster/Giant.java
-index 2019896dee313bcc982686fc665d1cb3e2d40503..2050230df7949e21f2158d2be5be885461afb66d 100644
+index 3f7d21a5be726d301e1bcaa11f1788b51c23a7cd..db95323da1aef267aa4fbe56aaff63cb8684e15b 100644
 --- a/src/main/java/net/minecraft/world/entity/monster/Giant.java
 +++ b/src/main/java/net/minecraft/world/entity/monster/Giant.java
 @@ -12,6 +12,7 @@ import net.minecraft.world.level.LevelReader;
@@ -62,10 +69,10 @@ index 2019896dee313bcc982686fc665d1cb3e2d40503..2050230df7949e21f2158d2be5be8854
  
      // Purpur start
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
-index b548f06bc0569f0f1ee5edaa07806c3017d5399a..6dfb577d1b6451d5a6c9231ad57e4aef7976edfc 100644
+index 9e3baf31775326e67a5a3bd5d9e836833b4810ba..4ba5c78fa10c1e30962f30d97821fa105f804904 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftLivingEntity.java
-@@ -1071,4 +1071,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
+@@ -1099,4 +1099,16 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
          getHandle().knockback(strength, directionX, directionZ);
      };
      // Paper end

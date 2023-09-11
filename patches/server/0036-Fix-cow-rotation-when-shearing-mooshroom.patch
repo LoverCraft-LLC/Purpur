@@ -5,7 +5,7 @@ Subject: [PATCH] Fix cow rotation when shearing mooshroom
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/animal/MushroomCow.java b/src/main/java/net/minecraft/world/entity/animal/MushroomCow.java
-index b1c2663a7f42714a620d59096f26f0a965875846..12b715086a347b82726327358ac71c72a4fca8b0 100644
+index 780a11339d2492dd607e3ef91867ffbb9062e2cd..b27c0f21354a78025f9d1664c560fb8799bced91 100644
 --- a/src/main/java/net/minecraft/world/entity/animal/MushroomCow.java
 +++ b/src/main/java/net/minecraft/world/entity/animal/MushroomCow.java
 @@ -202,7 +202,13 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo

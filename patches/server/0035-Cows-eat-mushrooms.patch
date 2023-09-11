@@ -5,7 +5,7 @@ Subject: [PATCH] Cows eat mushrooms
 
 
 diff --git a/src/main/java/net/minecraft/world/entity/animal/Cow.java b/src/main/java/net/minecraft/world/entity/animal/Cow.java
-index e24173dcd6f083a3ae61edcf71bb7236d644a422..b7a0ee0e055d12e36b411859211367c9df3b9549 100644
+index 621fe1c08dda65934437eeab679b6e5cd2d11d3d..28c7e240b7dd1957ccb6a45608b1d052a32dc18a 100644
 --- a/src/main/java/net/minecraft/world/entity/animal/Cow.java
 +++ b/src/main/java/net/minecraft/world/entity/animal/Cow.java
 @@ -2,6 +2,7 @@ package net.minecraft.world.entity.animal;
@@ -24,26 +24,26 @@ index e24173dcd6f083a3ae61edcf71bb7236d644a422..b7a0ee0e055d12e36b411859211367c9
  import net.minecraft.world.level.block.state.BlockState;
  // CraftBukkit start
  import org.bukkit.craftbukkit.event.CraftEventFactory;
-@@ -69,6 +71,7 @@ public class Cow extends Animal {
+@@ -70,6 +72,7 @@ public class Cow extends Animal {
          this.goalSelector.addGoal(0, new org.purpurmc.purpur.entity.ai.HasRider(this)); // Purpur
          this.goalSelector.addGoal(1, new PanicGoal(this, 2.0D));
          this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-+        if (level.purpurConfig.cowFeedMushrooms > 0) this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.WHEAT, Blocks.RED_MUSHROOM.asItem(), Blocks.BROWN_MUSHROOM.asItem()), false)); else // Purpur
++        if (level().purpurConfig.cowFeedMushrooms > 0) this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.WHEAT, Blocks.RED_MUSHROOM.asItem(), Blocks.BROWN_MUSHROOM.asItem()), false)); else // Purpur
          this.goalSelector.addGoal(3, new TemptGoal(this, 1.25D, Ingredient.of(Items.WHEAT), false));
          this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.25D));
          this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
-@@ -124,6 +127,10 @@ public class Cow extends Animal {
+@@ -125,6 +128,10 @@ public class Cow extends Animal {
  
              player.setItemInHand(hand, itemstack1);
-             return InteractionResult.sidedSuccess(this.level.isClientSide);
+             return InteractionResult.sidedSuccess(this.level().isClientSide);
 +        // Purpur start - feed mushroom to change to mooshroom
-+        } else if (level.purpurConfig.cowFeedMushrooms > 0 && this.getType() != EntityType.MOOSHROOM && isMushroom(itemstack)) {
++        } else if (level().purpurConfig.cowFeedMushrooms > 0 && this.getType() != EntityType.MOOSHROOM && isMushroom(itemstack)) {
 +            return this.feedMushroom(player, itemstack);
 +        // Purpur end
          } else {
              return super.mobInteract(player, hand);
          }
-@@ -139,4 +146,69 @@ public class Cow extends Animal {
+@@ -140,4 +147,69 @@ public class Cow extends Animal {
      protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
          return this.isBaby() ? dimensions.height * 0.95F : 1.3F;
      }
@@ -65,15 +65,15 @@ index e24173dcd6f083a3ae61edcf71bb7236d644a422..b7a0ee0e055d12e36b411859211367c9
 +    }
 +
 +    private InteractionResult feedMushroom(Player player, ItemStack stack) {
-+        level.broadcastEntityEvent(this, (byte) 18); // hearts
++        level().broadcastEntityEvent(this, (byte) 18); // hearts
 +        playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-+        if (incrementFeedCount(stack) < level.purpurConfig.cowFeedMushrooms) {
++        if (incrementFeedCount(stack) < level().purpurConfig.cowFeedMushrooms) {
 +            if (!player.getAbilities().instabuild) {
 +                stack.shrink(1);
 +            }
 +            return InteractionResult.CONSUME; // require 5 mushrooms to transform (prevents mushroom duping)
 +        }
-+        MushroomCow mooshroom = EntityType.MOOSHROOM.create(level);
++        MushroomCow mooshroom = EntityType.MOOSHROOM.create(level());
 +        if (mooshroom == null) {
 +            return InteractionResult.PASS;
 +        }
@@ -99,13 +99,13 @@ index e24173dcd6f083a3ae61edcf71bb7236d644a422..b7a0ee0e055d12e36b411859211367c9
 +        if (!new com.destroystokyo.paper.event.entity.EntityTransformedEvent(this.getBukkitEntity(), mooshroom.getBukkitEntity(), com.destroystokyo.paper.event.entity.EntityTransformedEvent.TransformedReason.INFECTED).callEvent()) {
 +            return InteractionResult.PASS;
 +        }
-+        this.level.addFreshEntity(mooshroom);
++        this.level().addFreshEntity(mooshroom);
 +        this.remove(RemovalReason.DISCARDED);
 +        if (!player.getAbilities().instabuild) {
 +            stack.shrink(1);
 +        }
 +        for (int i = 0; i < 15; ++i) {
-+            ((ServerLevel) level).sendParticles(((ServerLevel) level).players(), null, ParticleTypes.HAPPY_VILLAGER,
++            ((ServerLevel) level()).sendParticles(((ServerLevel) level()).players(), null, ParticleTypes.HAPPY_VILLAGER,
 +                    getX() + random.nextFloat(), getY() + (random.nextFloat() * 2), getZ() + random.nextFloat(), 1,
 +                    random.nextGaussian() * 0.05D, random.nextGaussian() * 0.05D, random.nextGaussian() * 0.05D, 0, true);
 +        }
@@ -114,10 +114,10 @@ index e24173dcd6f083a3ae61edcf71bb7236d644a422..b7a0ee0e055d12e36b411859211367c9
 +    // Purpur end
  }
 diff --git a/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java b/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
-index 21fec77f9cbbac41b92450cf7fd4ffc53efc27c3..068e387bdda6d7fe44fafd54aaee66eb44ff4380 100644
+index 524401b0ecdbe8cf67447072aafa58293dc11bf9..e7268c1a19d6d6cf1166c7242f954f55463c6cfa 100644
 --- a/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
 +++ b/src/main/java/org/purpurmc/purpur/PurpurWorldConfig.java
-@@ -339,6 +339,7 @@ public class PurpurWorldConfig {
+@@ -346,6 +346,7 @@ public class PurpurWorldConfig {
      public boolean cowRidableInWater = true;
      public boolean cowControllable = true;
      public double cowMaxHealth = 10.0D;
@@ -125,7 +125,7 @@ index 21fec77f9cbbac41b92450cf7fd4ffc53efc27c3..068e387bdda6d7fe44fafd54aaee66eb
      private void cowSettings() {
          cowRidable = getBoolean("mobs.cow.ridable", cowRidable);
          cowRidableInWater = getBoolean("mobs.cow.ridable-in-water", cowRidableInWater);
-@@ -349,6 +350,7 @@ public class PurpurWorldConfig {
+@@ -356,6 +357,7 @@ public class PurpurWorldConfig {
              set("mobs.cow.attributes.max_health", oldValue);
          }
          cowMaxHealth = getDouble("mobs.cow.attributes.max_health", cowMaxHealth);

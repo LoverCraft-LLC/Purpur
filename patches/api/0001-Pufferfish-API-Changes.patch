@@ -20,18 +20,18 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index cad12a2632b9ebb569280441c42869685db1f31a..b83e2c5a0a094002d12aee55ec0cf8d12bf33f3e 100644
+index fb47a794893d5fef026a35a7c573becf74420aa0..0330a20576c372c29ca4d98a2bc5b01e28303ac3 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -42,6 +42,7 @@ dependencies {
+@@ -46,6 +46,7 @@ dependencies {
      apiAndDocs("net.kyori:adventure-text-logger-slf4j")
-     api("org.apache.logging.log4j:log4j-api:2.17.1")
-     api("org.slf4j:slf4j-api:1.8.0-beta4")
+     api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+     api("org.slf4j:slf4j-api:$slf4jVersion")
 +    api("io.sentry:sentry:5.4.0") // Pufferfish
  
      implementation("org.ow2.asm:asm:9.4")
      implementation("org.ow2.asm:asm-commons:9.4")
-@@ -85,6 +86,13 @@ val generateApiVersioningFile by tasks.registering {
+@@ -89,6 +90,13 @@ val generateApiVersioningFile by tasks.registering {
      }
  }
  
@@ -480,7 +480,7 @@ index eaefbb00e9993d54906cc8cf35cf753c0d6c7707..301e82369603f3dd6e6c1bd380da4bac
  
              if (cloader instanceof PluginClassLoader) {
 diff --git a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
-index 1758e8a89c85eea8c2161ddcb5b0e745151a1f5e..fe21d31b463317eb90d58cbca5f098958ca93938 100644
+index 13da387d3b59bc67c0d73e3fbd3a4034b1281527..7572a0bf6614b02be3cbccc7b86e52ee1b8df621 100644
 --- a/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
 +++ b/src/main/java/org/bukkit/plugin/java/PluginClassLoader.java
 @@ -48,6 +48,8 @@ public final class PluginClassLoader extends URLClassLoader implements io.paperm
